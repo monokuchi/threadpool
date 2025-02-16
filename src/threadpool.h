@@ -14,18 +14,18 @@
 template<typename R, typename... ArgsTypes>
 class ThreadPool
 {
-   public:
-       ThreadPool(int32_t num_workers) : m_stop(false)
-       {
+    public:
+        ThreadPool(int32_t num_workers) : m_stop(false)
+        {
             // Pre-allocate vector
             m_workers.reserve(std::thread::hardware_concurrency());
             
             // Spawn threads
             add_workers(num_workers);
-       }
+        }
 
-       ~ThreadPool()
-       {
+        ~ThreadPool()
+        {
             // Set "m_stop" to true which will indicate to the running threads to stop their execution
             m_stop = true;
             // Notify all threads that "m_stop" has changed
@@ -38,13 +38,13 @@ class ThreadPool
                     thread.join();
                 }
             }
-       }
+        }
 
-       /*
-       Spawn "num_workers" amount of workers in the thread pool
-       */
-       void add_workers(int32_t num_workers)
-       {
+        /*
+        Spawn "num_workers" amount of workers in the thread pool
+        */
+        void add_workers(int32_t num_workers)
+        {
             // No workers to add, return
             if (num_workers == 0) { return; }
             // Catch negative inputs
@@ -90,14 +90,14 @@ class ThreadPool
                 + " threads while current hardware can only handle up to " + std::to_string(total_threads_supported) + " threads!");
                 throw std::invalid_argument(error_msg);
             }
-       }
+        }
 
-       /*
-       Adds a task to the task queue
-       */
-       template<typename F>
-       std::future<R> add_task(F&& func, ArgsTypes&&... args)
-       {
+        /*
+        Adds a task to the task queue
+        */
+        template<typename F>
+        std::future<R> add_task(F&& func, ArgsTypes&&... args)
+        {
             // Wrap the function with it's arguments into a lambda
             auto func_with_args = [&func, &args...]() { return func(args...); };
             // Put the lambda into a std::packaged_task
@@ -115,24 +115,24 @@ class ThreadPool
             m_cond_var.notify_one();
 
             return result;
-       }
+        }
 
-       /*
-       Returns the number of workers currently in the thread pool
-       */
-       size_t workers_size() { return m_workers.size(); }
+        /*
+        Returns the number of workers currently in the thread pool
+        */
+        size_t workers_size() { return m_workers.size(); }
 
-       /*
-       Returns the number of tasks currently in the queue
-       */
-       size_t tasks_size() { return m_tasks.size(); }
-
+        /*
+        Returns the number of tasks currently in the queue
+        */
+        size_t tasks_size() { return m_tasks.size(); }
+        
 
     private:
-       std::vector<std::thread> m_workers;
-       std::queue<std::packaged_task<R()>> m_tasks;
-       std::mutex m_mutex;
-       std::condition_variable m_cond_var;
-       std::atomic<bool> m_stop;
+        std::vector<std::thread> m_workers;
+        std::queue<std::packaged_task<R()>> m_tasks;
+        std::mutex m_mutex;
+        std::condition_variable m_cond_var;
+        std::atomic<bool> m_stop;
 };
 
